@@ -25,11 +25,6 @@ public type DeliverySchedule record {
     string deliveryDay?;
 };
 
-// change password to ur mysql password, and the database name to what u named ur database
-final mysql:Client dbClient = check new (host = "localhost", user = "root", password = "Breezy@04", port = 3306,
-    database = "logisticsystem", connectionPool = {maxOpenConnections: 3, minIdleConnections: 1}
-);
-
 //configuration of the consumer
 final kafka:ConsumerConfiguration consumerConfiguration = {
         
@@ -37,6 +32,11 @@ final kafka:ConsumerConfiguration consumerConfiguration = {
         offsetReset: "earliest",
         topics: ["new_delivery_requests"]
         };
+
+//making db client
+final mysql:Client dbClient = check new (host = "localhost", user = "root", password = "Breezy@04", port = 3306,
+    database = "logisticsystem", connectionPool = {maxOpenConnections: 3, minIdleConnections: 1}
+);
 
 //producer intailization
 service on new kafka:Listener(kafkaEndpoint, consumerConfiguration) {
@@ -63,9 +63,8 @@ service on new kafka:Listener(kafkaEndpoint, consumerConfiguration) {
             json deliveryJson = check message.fromJsonString();
             Deliveries delivery = check deliveryJson.cloneWithType(Deliveries);
 
-        sql:ExecutionResult _ = check dbClient->execute(`INSERT INTO deliveries (delivery_id, customer_name, contact_number, pickup_location, delivery_location, delivery_type, preferred_times, tracking_id) 
+            sql:ExecutionResult _ = check dbClient->execute(`INSERT INTO deliveries (delivery_id, customer_name, contact_number, pickup_location, delivery_location, delivery_type, preferred_times, tracking_id) 
         VALUES (${delivery.deliveryId},${delivery.customerName},${delivery.contactNumber}, ${delivery.pickUpLocation}, ${delivery.deliveryLocation}, ${delivery.deliverytype}, ${delivery.preferred_time}, ${delivery.tracking_id})`);
-
 
             string topicTosend;
             if delivery.deliverytype == "standard" {
@@ -88,7 +87,4 @@ service on new kafka:Listener(kafkaEndpoint, consumerConfiguration) {
     }
 
 }
-
-
-
 
