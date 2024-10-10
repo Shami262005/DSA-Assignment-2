@@ -63,9 +63,7 @@ service on new kafka:Listener(kafkaEndpoint, consumerConfiguration) {
             json deliveryJson = check message.fromJsonString();
             Deliveries delivery = check deliveryJson.cloneWithType(Deliveries);
 
-            int insertId = check addInfo(delivery);
-
-            log:printInfo("Record inserted with ID: " + insertId.toString());
+            check addInfo(delivery);
 
             string topicTosend;
             if delivery.deliverytype == "standard" {
@@ -89,16 +87,11 @@ service on new kafka:Listener(kafkaEndpoint, consumerConfiguration) {
 
 }
 
-function addInfo(Deliveries SD) returns int|error {
+function addInfo(Deliveries SD) returns error? {
 
-    sql:ExecutionResult result = check dbClient->execute(`INSERT INTO deliveries (delivery_id, customer_name, contact_number, pickup_location, delivery_location, delivery_type, preferred_times, tracking_id) 
+    sql:ExecutionResult _ = check dbClient->execute(`INSERT INTO deliveries (delivery_id, customer_name, contact_number, pickup_location, delivery_location, delivery_type, preferred_times, tracking_id) 
         VALUES (${SD.deliveryId},${SD.customerName},${SD.contactNumber}, ${SD.pickUpLocation}, ${SD.deliveryLocation}, ${SD.deliverytype}, ${SD.preferred_time}, ${SD.tracking_id})`);
 
-    int|string? lastInsertId = result.lastInsertId;
-    if lastInsertId is int {
-        return lastInsertId;
-    } else {
-        return error("Unable to obtain last insert ID");
-    }
+return ;
 
 }
