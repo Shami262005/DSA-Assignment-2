@@ -4,7 +4,7 @@ import ballerinax/kafka;
 import ballerinax/mysql;
 import ballerinax/mysql.driver as _;
 
-configurable string kafkaEndpoint = "localhost:9092, localhost:9093 ";
+configurable string kafkaEndpoint = "localhost:9092, localhost:9093";
 
 public type Deliveries record {
 
@@ -55,7 +55,7 @@ service on new kafka:Listener(kafkaEndpoint, consumerConfiguration) {
 
     }
 
-    remote function onConsumerRecord(kafka:Caller simpleConsumer, kafka:BytesConsumerRecord[] records) returns error? {
+    remote function onConsumerRecord(kafka:Caller caller, kafka:BytesConsumerRecord[] records) returns error? {
 
         foreach kafka:BytesConsumerRecord entry in records {
 
@@ -63,7 +63,9 @@ service on new kafka:Listener(kafkaEndpoint, consumerConfiguration) {
             json deliveryJson = check message.fromJsonString();
             Deliveries delivery = check deliveryJson.cloneWithType(Deliveries);
 
-            check addInfo(delivery);
+        sql:ExecutionResult _ = check dbClient->execute(`INSERT INTO deliveries (delivery_id, customer_name, contact_number, pickup_location, delivery_location, delivery_type, preferred_times, tracking_id) 
+        VALUES (${delivery.deliveryId},${delivery.customerName},${delivery.contactNumber}, ${delivery.pickUpLocation}, ${delivery.deliveryLocation}, ${delivery.deliverytype}, ${delivery.preferred_time}, ${delivery.tracking_id})`);
+
 
             string topicTosend;
             if delivery.deliverytype == "standard" {
@@ -87,11 +89,6 @@ service on new kafka:Listener(kafkaEndpoint, consumerConfiguration) {
 
 }
 
-function addInfo(Deliveries SD) returns error? {
 
-    sql:ExecutionResult _ = check dbClient->execute(`INSERT INTO deliveries (delivery_id, customer_name, contact_number, pickup_location, delivery_location, delivery_type, preferred_times, tracking_id) 
-        VALUES (${SD.deliveryId},${SD.customerName},${SD.contactNumber}, ${SD.pickUpLocation}, ${SD.deliveryLocation}, ${SD.deliverytype}, ${SD.preferred_time}, ${SD.tracking_id})`);
 
-return ;
 
-}
