@@ -1,11 +1,8 @@
-import ballerina/http;
-import ballerina/io;
 import ballerina/log;
 import ballerina/sql;
 import ballerinax/kafka;
 import ballerinax/mysql;
 import ballerinax/mysql.driver as _;
-
 
 configurable string kafkaEndpoint = "localhost:9092, localhost:9093 ";
 
@@ -22,7 +19,6 @@ public type Deliveries record {
 
 };
 
-
 public type DeliverySchedule record {
     int scheduleId?;
     string deliveryName?;
@@ -37,14 +33,14 @@ final mysql:Client dbClient = check new (host = "localhost", user = "root", pass
 //configuration of the consumer
 final kafka:ConsumerConfiguration consumerConfiguration = {
         
-         groupId: "ConsumerRecieveRequest",
+        groupId: "ConsumerRecieveRequest",
         offsetReset: "earliest",
         topics: ["new_delivery_requests"]
         };
 
 //producer intailization
 service on new kafka:Listener(kafkaEndpoint, consumerConfiguration) {
-    
+
     private final kafka:Producer orderProducer;
 
     function init() returns error? {
@@ -55,38 +51,54 @@ service on new kafka:Listener(kafkaEndpoint, consumerConfiguration) {
             retryCount: 3
 };
 
-     self.orderProducer = check new (kafkaEndpoint, producerConfiguration);
+        self.orderProducer = check new (kafkaEndpoint, producerConfiguration);
 
     }
 
+    remote function onConsumerRecord(kafka:Caller simpleConsumer, kafka:BytesConsumerRecord[] records) returns error? {
 
-remote function onConsumerRecord(kafka:Consumer simpleConsumer,kafka:ConsumerRecord[] records) returns error?{
-    
-    foreach var entry in records {
-        
-        json deliveryJson = check entry.value.fromJson();
-        Deliveries delivery = check deliveryJson.cloneWithType(Deliveries);
+        foreach kafka:BytesConsumerRecord entry in records {
 
-        sql:ExecutionResult result = check dbClient->execute(`INSERT INTO deliveries (delivery_id, customer_name, contact_number, pickup_location, delivery_location, delivery_type, preferred_times, tracking_id) 
-        VALUES (${delivery.deliveryId},${delivery.customerName},${delivery.contactNumber}, ${delivery.pickUpLocation}, ${delivery.deliveryLocation}, ${delivery.deliverytype}, ${delivery.preferred_time}, ${delivery.tracking_id})`);
+            string message = check string:fromBytes(entry.value);
+            json deliveryJson = check message.fromJsonString();
+            Deliveries delivery = check deliveryJson.cloneWithType(Deliveries);
 
-    string topicTosend;
-     if delivery.deliverytype == "standard" {
-        topicTosend = "standard_delivery_requests";
-     }else if delivery.deliverytype == "international" {
-        topicTosend = "international_delivery_requests";
-     }else if delivery.deliverytype == "express" {
-        topicTosend = "express_delivery_requests";
-     } else {
-        log:printError("Unknown delivery Type");
-        continue;
-     }
+            int insertId = check addInfo(delivery);
 
-    check self.orderProducer ->send(producerRecord = {topic: topicTosend, value:deliveryJson.toBalString() });
+            log:printInfo("Record inserted with ID: " + insertId.toString());
 
+            string topicTosend;
+            if delivery.deliverytype == "standard" {
+                topicTosend = "standard_delivery_requests";
+            } else if delivery.deliverytype == "international" {
+                topicTosend = "international_delivery_requests";
+            } else if delivery.deliverytype == "express" {
+                topicTosend = "express_delivery_requests";
+            } else {
+                log:printError("Unknown delivery Type");
+                continue;
+            }
+
+            check self.orderProducer->send({
+                topic: topicTosend,
+                value: delivery.toString()
+            });
+
+        }
     }
-}
 
 }
 
+function addInfo(Deliveries SD) returns int|error {
 
+    sql:ExecutionResult result = check dbClient->execute(`INSERT INTO deliveries (delivery_id, customer_name, contact_number, pickup_location, delivery_location, delivery_type, preferred_times, tracking_id) 
+        VALUES (${SD.deliveryId},${SD.customerName},${SD.contactNumber}, ${SD.pickUpLocation}, ${SD.deliveryLocation}, ${SD.deliverytype}, ${SD.preferred_time}, ${SD.tracking_id})`);
+
+    int|string? lastInsertId = result.lastInsertId;
+    if lastInsertId is int {
+        return lastInsertId;
+    } else {
+        return error("Unable to obtain last insert ID");
+    }
+
+}
