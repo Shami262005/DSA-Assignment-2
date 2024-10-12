@@ -1,0 +1,45 @@
+Required Commands:
+--Start zookeper
+.\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties
+--start kafaka severs
+.\bin\windows\kafka-server-start.bat .\config\Server1.properties
+.\bin\windows\kafka-server-start.bat .\config\Server2.properties
+.\bin\windows\kafka-server-start.bat .\config\Server3.properties
+
+--creation of topics
+ kafka-topics.bat --create --topic new-delivery-requests --bootstrap-server localhost:9092 --partitions 3 --replication-factor 2
+ kafka-topics.bat --create --topic standard-delivery-request --bootstrap-server localhost:9092 --partitions 3 --replication-factor 2
+ kafka-topics.bat --create --topic international-delivery-request --bootstrap-server localhost:9092 --partitions 3 --replication-factor 2
+ kafka-topics.bat --create --topic express-delivery-request --bootstrap-server localhost:9092 --partitions 3 --replication-factor 2
+ kafka-topics.bat --create --topic standard-delivery-response --bootstrap-server localhost:9092 --partitions 3 --replication-factor 2
+ kafka-topics.bat --create --topic international-delivery-response --bootstrap-server localhost:9092 --partitions 3 --replication-factor 2
+ kafka-topics.bat --create --topic express-delivery-response --bootstrap-server localhost:9092 --partitions 3 --replication-factor 2
+ kafka-topics.bat --create --topic delivery-schedule-response --bootstrap-server localhost:9092 --partitions 3 --replication-factor 2
+
+
+kafka-topics.bat --create --bootstrap-server localhost:9092 --replication-factor 1 --partition 1 --topic test
+--enable consumer
+kafka-console-consumer.bat --topic standard-response --bootstrap-server localhost:9092 --from-beginning
+enable producer
+kafka-console-producer.bat --broker-list localhost:9092 --topic standard-delivery-requests
+
+Kafka-topic.bat --create --boostrap server localhost localhost:9092 --topic test.
+--Create topics create topics in bin\windows
+kafka-topics.bat --create --bootstrap-server localhost:9092 --topic customerrequests
+kafka-topics.bat --create --bootstrap-server localhost:9092 --topic Logistics-standard-response
+kafka-topics.bat --create --bootstrap-server localhost:9092 --topic standard-response
+kafka-topics.bat --create --bootstrap-server localhost:9092 --topic standard-delivery-requests
+kafka-topics.bat --create --bootstrap-server localhost:9092 --topic express-delivery-requests 
+kafka-topics.bat --create --bootstrap-server localhost:9092 --topic international-delivery-requests
+
+{"requestId": "REQ123", "firstName": "John", "lastName": "Doe", "contactNumber": "1234567890", "pickupLocation": "123 Pickup St", "deliveryLocation": "456 Delivery Ave", "preferredTimeSlot": "16:00:00"}
+
+{
+    "requestId": "REQ-20231010",
+    "firstName": "Shamiso",
+    "lastName": "Moyo",
+    "contactNumber": "+263771234567",
+    "pickupLocation": "Windhoek, Namibia",
+    "deliveryLocation": "Havana, Namibia",
+    "preferredTimeSlot": "16:00:00"
+}
