@@ -25,7 +25,7 @@ kafka-console-producer.bat --broker-list localhost:9092 --topic standard-deliver
 
 Kafka-topic.bat --create --boostrap server localhost localhost:9092 --topic test.
 --Create topics create topics in bin\windows
-kafka-topics.bat --create --bootstrap-server localhost:9092 --topic customerrequests
+kafka-topics.bat --create --bootstrap-server localhost:9092 --topic new-delivery-requests
 kafka-topics.bat --create --bootstrap-server localhost:9092 --topic Logistics-standard-response
 kafka-topics.bat --create --bootstrap-server localhost:9092 --topic standard-response
 kafka-topics.bat --create --bootstrap-server localhost:9092 --topic standard-delivery-requests

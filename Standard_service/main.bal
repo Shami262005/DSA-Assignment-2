@@ -7,7 +7,7 @@ import ballerinax/mysql.driver as _;
 
 // Define the standard delivery request record
 type StandardDeliveryRequest record {
-    string id;
+    string customerID;
     string firstName;
     string lastName;
     string contactNumber;
@@ -41,7 +41,7 @@ type Timeslot record {
 // Kafka listener for receiving standard delivery requests
 listener kafka:Listener kafkaListener = new (kafka:DEFAULT_URL, {
     groupId: "standard_delivery_group",
-    topics: ["standard-delivery-request"]
+    topics: ["standard-delivery-requests"]
 });
 
 // Kafka producer to send responses back
@@ -96,16 +96,17 @@ function processStandardDeliveryRequest(StandardDeliveryRequest request) returns
         if updateResult is sql:Error {
             return updateResult;
         }
+        string status = "Confirmed";
 
         // Insert the delivery details into the database
         sql:ExecutionResult|sql:Error insertResult = dbClient->execute(`INSERT INTO standard_deliveries 
                                                                         (tracking_id, customer_id, first_name, last_name, contact_number,shipment_type,
                                                                          pickup_location, delivery_location, pickup_time_id, 
-                                                                         estimated_delivery_time) 
-                                                                         VALUES (${trackingId},${request.id} ,${request.firstName}, 
-                                                                         ${request.lastName}, ${request.contactNumber},${request.preferredTimeSlot},
+                                                                         estimated_delivery_time,status) 
+                                                                         VALUES (${trackingId},${request.customerID} ,${request.firstName}, 
+                                                                         ${request.lastName}, ${request.contactNumber},${request.shipmentType},
                                                                          ${request.pickupLocation}, ${request.deliveryLocation}, 
-                                                                         ${slotId}, ${estimatedDeliveryTime})`);
+                                                                         ${slotId}, ${estimatedDeliveryTime},${status})`);
         if insertResult is sql:Error {
             return insertResult;
         }
@@ -113,7 +114,7 @@ function processStandardDeliveryRequest(StandardDeliveryRequest request) returns
         // Send confirmation back to logistics service
         json payload = {
             tracking_id: trackingId,
-            requestID: request.id,
+            customer_id: request.customerID,
             firstName: request.firstName,
             lastName: request.lastName,
             contactNumber: request.contactNumber,

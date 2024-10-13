@@ -16,17 +16,6 @@ type CustomerRequest readonly & record {
     string preferredTimeSlot;
 };
 
-type Starndardresponses record {
-    string firstName;
-    string lastName;
-    string contactNumber;
-    string shipmentType;
-    string pickupLocation;
-    string deliveryLocation;
-    string preferredTimeSlot;
-    string requestId; // Added requestId for tracking
-};
-
 type CustomerResponse readonly & record {
 
 };
@@ -76,8 +65,8 @@ service on kafkaListener {
                     firstName: request.firstName,
                     lastName: request.lastName,
                     contactNumber: request.contactNumber,
-                    shipmentType: request.shipmentType,
                     pickupLocation: request.pickupLocation,
+                    shipmentType: request.shipmentType,
                     deliveryLocation: request.deliveryLocation,
                     preferredTimeSlot: request.preferredTimeSlot
                 };
@@ -135,6 +124,7 @@ isolated function HandleStandardResponses(string customer_ID) returns responses|
     foreach var response in standardresponses {
         if response.customer_id.toString() == customer_ID.toString() {
             return response;
+
         }
     }
     return error("No matching response found for requestID: " + customer_ID);
