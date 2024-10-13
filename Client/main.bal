@@ -2,8 +2,11 @@ import ballerina/io;
 import ballerina/random;
 import ballerinax/kafka;
 
-kafka:Producer kafkaProducer = check new (kafka:DEFAULT_URL);
-kafka:Consumer Logisticsresponses = check new (kafka:DEFAULT_URL, {groupId: "logisticss_group", topics: ["Logistics-service-response"]});
+// Initialize Kafka Producer
+kafka:Producer kafkaProducer = check new(kafka:DEFAULT_URL, {
+    clientId: "logistics_producer",
+    acks: "all"
+});
 
 // Define the structure of the customer request
 type CustomerRequest readonly & record {
@@ -30,6 +33,12 @@ type CustomerResponse readonly & record {
     string estimated_delivery_time;
 };
 
+// Kafka Consumer for handling responses
+kafka:Consumer Logisticsresponses = check new (kafka:DEFAULT_URL, {
+    groupId: "logistics_group",
+    topics: ["Logistics-service-response"]
+});
+
 public function main() returns error? {
     // Get user input
     io:println("Enter first name:");
@@ -45,15 +54,16 @@ public function main() returns error? {
     io:println("Enter delivery location:");
     string deliveryLocation = io:readln();
 
-    // Show available time slots based on shipment type
-    string[] timeSlots = getTimeSlots(shipmentType);
+    // Show available time slots
     io:println("Available time slots:");
+    string[] timeSlots = getTimeSlots();
     foreach string slot in timeSlots {
         io:println(slot);
     }
     io:println("Enter preferred time slot:");
     string preferredTimeSlot = io:readln();
 
+    // Generate a random request ID
     int randomNum = check random:createIntInRange(100000, 999999);
     string strRandomNum = randomNum.toString();
 
@@ -68,30 +78,34 @@ public function main() returns error? {
         deliveryLocation: deliveryLocation,
         preferredTimeSlot: preferredTimeSlot
     };
-    check handleCustomerRequest(customerRequest, customerRequest.id);
-    // Send the customer request as a JSON string to the 'customer_requests' topic
 
+    // Handle customer request and send to Kafka
+    check handleCustomerRequest(customerRequest, customerRequest.id);
     io:println("Customer request sent to logistics service.");
 }
 
-// Kafka producer to send customer requests
-
+// Function to handle customer request
 function handleCustomerRequest(CustomerRequest customerRequest, string customer_Id) returns error? {
-    check kafkaProducer->send({topic: "new-delivery-requests", value: customerRequest.toString()});
+    // Send customer request to Kafka topic
+    check kafkaProducer->send({
+        topic: "new-delivery-requests",
+        value: customerRequest.toJsonString()
+    });
+
+    // Handle the response from Kafka
     CustomerResponse response = check handleResponses(customer_Id);
     io:println("Response loading........");
     displayResponse(response);
 }
 
+// Function to display the response
 function displayResponse(CustomerResponse response) {
     io:println("------------------------------------------------");
-    io:println("------------------------------------------------");
     io:println("Your information:");
-    io:println("............................................");
     io:println(string `First Name: ${response.firstName}`);
     io:println(string `Last Name: ${response.lastName}`);
     io:println(string `Contact Number: ${response.contactNumber}`);
-    io:println("............................................");
+    io:println("------------------------------------------------");
     io:println("Delivery information:");
     io:println(string `Shipment Type: ${response.shipmentType}`);
     io:println(string `Pickup Location: ${response.pickupLocation}`);
@@ -100,11 +114,10 @@ function displayResponse(CustomerResponse response) {
     io:println(string `Tracking ID: ${response.tracking_id}`);
     io:println(string `Estimated Delivery Time: ${response.estimated_delivery_time}`);
     io:println("------------------------------------------------");
-    io:println(`THANK YOU FOR USING OUR DELIVERY SERVICE + ${response.firstName}`);
-    io:println("------------------------------------------------");
-    io:println("------------------------------------------------");
+    io:println(`THANK YOU FOR USING OUR DELIVERY SERVICE, ${response.firstName}`);
 }
 
+// Function to handle Kafka responses
 function handleResponses(string customer_ID) returns CustomerResponse|error {
     CustomerResponse[] responses = check Logisticsresponses->pollPayload(1000);
 
@@ -116,15 +129,7 @@ function handleResponses(string customer_ID) returns CustomerResponse|error {
     return error("No matching response found for requestID: " + customer_ID);
 }
 
-// Function to get available time slots based on shipment type
-function getTimeSlots(string shipmentType) returns string[] {
-    if (shipmentType == "standard") {
-        return ["09:00 AM - 11:00 AM", "01:00 PM - 03:00 PM", "05:00 PM - 07:00 PM"];
-    } else if (shipmentType == "express") {
-        return ["08:00 AM - 10:00 AM", "12:00 PM - 02:00 PM", "04:00 PM - 06:00 PM"];
-    } else if (shipmentType == "international") {
-        return ["07:00 AM - 09:00 AM", "11:00 AM - 01:00 PM", "03:00 PM - 05:00 PM"];
-    } else {
-        return [];
-    }
+// Function to get available time slots
+function getTimeSlots() returns string[] {
+    return ["07:00 AM - 09:00 AM", "11:00 AM - 01:00 PM", "03:00 PM - 05:00 PM"];
 }

@@ -1,0 +1,5 @@
+[container.image]
+repository="wso2inc"
+name="international"
+tag="v0.1.0"
+

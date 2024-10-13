@@ -40,3 +40,16 @@ CREATE TABLE standard_deliveries (
     FOREIGN KEY (customer_id) REFERENCES customer_requests(id),
     FOREIGN KEY (pickup_time_id) REFERENCES standard_time_slots(id)
 );
+
+CREATE TABLE international_customer_requests (
+    id VARCHAR(60) PRIMARY KEY,
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    contact_number VARCHAR(15),
+    shipment_type VARCHAR(20),
+    pickup_location VARCHAR(100),
+    delivery_location VARCHAR(100),
+    preferred_time_slot VARCHAR(50),
+    country VARCHAR(50),  -- Field for the country
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+);
