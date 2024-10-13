@@ -73,7 +73,7 @@ function processInternationalDeliveryRequest(InternationalDeliveryRequest reques
         string trackingId = check generateTrackingId();
         string estimatedDeliveryTime = check calculateEstimatedDeliveryTime(result.year, result.month, result.day, timeSlot);
         string pickup_time = string `${result.year}-${result.month}-${result.day} time: ${timeSlot}`;
-        
+
         // Update the time slot to unavailable
         sql:ExecutionResult|sql:Error updateResult = dbClient->execute(`UPDATE international_time_slots 
                                                                          SET is_available = false WHERE id = ${slotId}`);
