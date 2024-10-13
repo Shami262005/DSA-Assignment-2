@@ -3,7 +3,7 @@ import ballerina/random;
 import ballerinax/kafka;
 
 // Initialize Kafka Producer
-kafka:Producer kafkaProducer = check new(kafka:DEFAULT_URL, {
+kafka:Producer kafkaProducer = check new (kafka:DEFAULT_URL, {
     clientId: "logistics_producer",
     acks: "all"
 });
@@ -47,21 +47,17 @@ public function main() returns error? {
     string lastName = io:readln();
     io:println("Enter contact number:");
     string contactNumber = io:readln();
-    io:println("Enter shipment type (standard/express/international):");
-    string shipmentType = io:readln();
+
+    // Shipment Type Selection
+    string shipmentType = getShipmentType();
+
     io:println("Enter pickup location:");
     string pickupLocation = io:readln();
     io:println("Enter delivery location:");
     string deliveryLocation = io:readln();
 
-    // Show available time slots
-    io:println("Available time slots:");
-    string[] timeSlots = getTimeSlots();
-    foreach string slot in timeSlots {
-        io:println(slot);
-    }
-    io:println("Enter preferred time slot:");
-    string preferredTimeSlot = io:readln();
+    // Time Slot Selection
+    string preferredTimeSlot = getTimeSlot();
 
     // Generate a random request ID
     int randomNum = check random:createIntInRange(100000, 999999);
@@ -129,7 +125,57 @@ function handleResponses(string customer_ID) returns CustomerResponse|error {
     return error("No matching response found for requestID: " + customer_ID);
 }
 
-// Function to get available time slots
+// Function to get shipment type
+function getShipmentType() returns string {
+    io:println("Select shipment type:");
+    io:println("1: Standard");
+    io:println("2: Express");
+    io:println("3: International");
+
+    string[] shipmentTypes = ["standard", "express", "international"];
+    string choiceInput = io:readln();
+    int|error choice = int:fromString(choiceInput);
+
+    if choice is int && choice >= 1 && choice <= 3 {
+        return shipmentTypes[choice - 1];
+    } else {
+        io:println("Invalid choice. Please choose again.");
+        return getShipmentType();
+    }
+}
+
+// Function to get available time slots in 24-hour format
+function getTimeSlot() returns string {
+    io:println("Available time slots:");
+
+    string[] timeSlots = getTimeSlots();
+    foreach int i in 0 ..< (timeSlots.length()) {
+        io:println(string `${i + 1}: ${timeSlots[i]}`);
+    }
+
+    io:println("Select a time slot by entering the number:");
+    string choiceInput = io:readln();
+    int|error choice = int:fromString(choiceInput);
+
+    if choice is int && choice >= 1 && choice <= timeSlots.length() {
+        return timeSlots[choice - 1];
+    } else {
+        io:println("Invalid choice. Please choose again.");
+        return getTimeSlot();
+    }
+}
+
+// Function to define available time slots (08:00 - 17:00 in 24-hour format)
 function getTimeSlots() returns string[] {
-    return ["07:00 AM - 09:00 AM", "11:00 AM - 01:00 PM", "03:00 PM - 05:00 PM"];
+    return [
+        "08:00 - 09:00",
+        "09:00 - 10:00",
+        "10:00 - 11:00",
+        "11:00 - 12:00",
+        "12:00 - 13:00",
+        "13:00 - 14:00",
+        "14:00 - 15:00",
+        "15:00 - 16:00",
+        "16:00 - 17:00"
+    ];
 }

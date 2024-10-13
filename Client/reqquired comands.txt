@@ -2,7 +2,7 @@ Required Commands:
 --Start zookeper
 .\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties
 --start kafaka severs
-.\bin\windows\kafka-server-start.bat .\config\Server1.properties
+.\bin\windows\kafka-server-start.bat .\config\server.properties
 .\bin\windows\kafka-server-start.bat .\config\Server2.properties
 .\bin\windows\kafka-server-start.bat .\config\Server3.properties
 
