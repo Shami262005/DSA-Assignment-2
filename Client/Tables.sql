@@ -53,18 +53,3 @@ CREATE TABLE international_customer_requests (
     country VARCHAR(50),  -- Field for the country
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
 );
-
-CREATE TABLE international_deliveries (
-    tracking_id VARCHAR(20) PRIMARY KEY,
-    customer_id VARCHAR(50),
-    first_name VARCHAR(50),
-    last_name VARCHAR(50),
-    contact_number VARCHAR(15),
-    shipment_type VARCHAR(50),
-    pickup_location VARCHAR(100),
-    delivery_location VARCHAR(100),
-    pickup_time_id INT,
-    estimated_delivery_time VARCHAR(20),
-    customs_info VARCHAR(255),
-    FOREIGN KEY (pickup_time_id) REFERENCES international_time_slots(id)
-);

@@ -50,7 +50,7 @@ listener kafka:Listener internationalKafkaListener = new (kafka:DEFAULT_URL, {
 kafka:Producer kafkaInternationalProducer = check new (kafka:DEFAULT_URL);
 
 // MySQL client setup
-mysql:Client dbClient = check new (user = "root", password = "Victoria@1509", database = "logistics_service", host = "localhost", port = 3306);
+mysql:Client dbClient = check new (user = "root", password = "Victoria@1509", database = "Assignment2", host = "localhost", port = 3306);
 
 // Kafka service that listens for incoming international delivery requests
 service on internationalKafkaListener {

@@ -49,7 +49,7 @@ final kafka:Consumer expressResponseConsumer = check new (kafka:DEFAULT_URL, {gr
 final kafka:Consumer internationalResponseConsumer = check new (kafka:DEFAULT_URL, {groupId: "international_group", topics: ["international-delivery-response"]});
 
 // Database connection
-mysql:Client dbClient = check new (user = "root", password = "Victoria@1509", database = "logistics_service", host = "localhost", port = 3306);
+mysql:Client dbClient = check new (user = "root", password = "shamiso2005", database = "logistics_service", host = "localhost", port = 3306);
 
 // Main service for incoming requests
 service on kafkaListener {

@@ -16,8 +16,4 @@ RUN bal build
 EXPOSE 9090
 
 # Define the entry point for the Docker container
-<<<<<<< HEAD
-CMD ["bal", "run", "Express_Service.jar"]
-=======
-CMD ["java", "-jar", "target/bin/International_Service.jar"]
->>>>>>> 3ff956316010c061c094a47f620c67303926d493
+CMD ["bal", "run", "International_service.jar"]
