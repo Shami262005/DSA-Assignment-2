@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  # Zookeeper service required for Kafka
+  zookeeper:
+    image: 'confluentinc/cp-zookeeper:7.0.1'
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - '2181:2181'
+    networks:
+      - logistics-network
+
+  # Kafka broker service
+  kafka:
+    image: 'confluentinc/cp-kafka:7.0.1'
+    depends_on:
+      - zookeeper
+    ports:
+      - '9092:9092'
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - logistics-network
+
+  # MySQL service
+  mysql:
+    image: 'mysql:8.0'
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: 'rootpassword'
+      MYSQL_DATABASE: 'logistics'
+      MYSQL_USER: 'logistics_user'
+      MYSQL_PASSWORD: 'logistics_password'
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - logistics-network
+
+  # Logistics service (sample Ballerina service)
+  logistics_server:
+    build: ./logistics_server
+    ports:
+      - "8080:8080"
+    depends_on:
+      - kafka
+      - mysql
+    networks:
+      - logistics-network
+
+  # Standard Delivery service (example)
+  standard_delivery:
+    build: ./Standard_service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - kafka
+    networks:
+      - logistics-network
+
+  # Express Delivery service (example)
+  express_service:
+    build: ./Express_service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - kafka
+    networks:
+      - logistics-network
+
+  # International Delivery service (example)
+  international_service:
+    build: ./International_service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - kafka
+    networks:
+      - logistics-network
+
+volumes:
+  mysql-data:
+
+networks:
+  logistics-network:
+    driver: bridge
