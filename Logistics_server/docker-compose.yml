@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  logistics_service:
+  Logistics_server:
     build:
       context: .
       dockerfile: Dockerfile

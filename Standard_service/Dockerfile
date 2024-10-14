@@ -16,4 +16,4 @@ RUN bal build
 EXPOSE 9090
 
 # Define the entry point for the Docker container
-CMD ["bal", "run", "Logistics_server.jar"]
+CMD ["bal", "run", "Standard_Service.jar"]
