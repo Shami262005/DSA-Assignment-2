@@ -3,6 +3,12 @@ import ballerina/random;
 import ballerina/sql;
 import ballerinax/kafka;
 import ballerinax/mysql;
+import ballerina/io;
+import ballerina/random;
+import ballerina/sql;
+import ballerinax/kafka;
+import ballerinax/mysql;
+import ballerinax/mysql.driver;
 
 // Define the delivery request record
 type DeliveryRequest record {
