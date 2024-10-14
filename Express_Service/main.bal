@@ -36,7 +36,7 @@ listener kafka:Listener kafkaListener = new (kafka:DEFAULT_URL, {
 kafka:Producer kafkaProducer = check new (kafka:DEFAULT_URL);
 
 // MySQL client setup
-mysql:Client dbClient = check new (user = "root", password = "Victoria@1509", database = "Assignment2", host = "localhost", port = 3306);
+mysql:Client dbClient = check new (user = "root", password = "Victoria@1509", database = "logistics_service", host = "localhost", port = 3306);
 
 // Kafka service that listens for incoming express delivery requests
 service on kafkaListener {

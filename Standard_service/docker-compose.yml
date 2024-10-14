@@ -1,12 +1,24 @@
 version: '3.8'
 
 services:
+<<<<<<< HEAD
   Standard_service:
+=======
+  international_service-logistics_service:
+>>>>>>> 3ff956316010c061c094a47f620c67303926d493
     build:
       context: .
       dockerfile: Dockerfile
     ports:
+<<<<<<< HEAD
       - "9090:9090"
     stdin_open: true  # Keep stdin open
     tty: true         # Allocate a pseudo-TTY
 
+=======
+      - "8080:8080"
+    stdin_open: true  # Keep stdin open
+    tty: true         # Allocate a pseudo-TTY
+
+
+>>>>>>> 3ff956316010c061c094a47f620c67303926d493
