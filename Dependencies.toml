@@ -131,8 +131,8 @@ modules = [
 ]
 
 [[package]]
-org = "taapo"
-name = "Client"
+org = "rachel"
+name = "DSA_Assignment_2"
 version = "0.1.0"
 dependencies = [
 	{org = "ballerina", name = "io"},
@@ -141,6 +141,6 @@ dependencies = [
 	{org = "ballerinax", name = "kafka"}
 ]
 modules = [
-	{org = "taapo", packageName = "Client", moduleName = "Client"}
+	{org = "rachel", packageName = "DSA_Assignment_2", moduleName = "DSA_Assignment_2"}
 ]
 
