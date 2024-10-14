@@ -3,7 +3,7 @@ import ballerina/random;
 import ballerina/sql;
 import ballerinax/kafka;
 import ballerinax/mysql;
-import ballerinax/mysql.driver;
+import ballerinax/mysql.driver as _;
 
 // Define the delivery request record
 type DeliveryRequest record {
