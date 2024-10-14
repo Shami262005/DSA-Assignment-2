@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  international_service-logistics_service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    stdin_open: true  # Keep stdin open
+    tty: true         # Allocate a pseudo-TTY
+
+
